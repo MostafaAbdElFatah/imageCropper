@@ -1,10 +1,4 @@
-//
-//  ViewController.swift
-//  ImageCropper
-//
-//  Created by Mostafa on 7/22/17.
-//  Copyright © 2017 Mostafa. All rights reserved.
-//
+
 
 import UIKit
 
@@ -16,28 +10,28 @@ class ViewController: UIViewController ,UIScrollViewDelegate , UIImagePickerCont
     override func viewDidLoad() {
         super.viewDidLoad()
         self.scrollView.delegate = self
-        self.imageView.frame = CGRectMake(0, 0, self.scrollView.frame.size.width, self.scrollView.frame.size.height)
+        self.imageView.frame = CGRect(x: 0, y: 0, width: self.scrollView.frame.size.width, height: self.scrollView.frame.size.height)
         self.imageView.image = UIImage(named: "2")
-        imageView.userInteractionEnabled = true
+        imageView.isUserInteractionEnabled = true
         self.scrollView.addSubview(imageView)
-        let tapGestureRecognizer:UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "loadimage:")
+        let tapGestureRecognizer:UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.loadimage(_:)))
         tapGestureRecognizer.numberOfTapsRequired = 1
         imageView.addGestureRecognizer(tapGestureRecognizer)
         
     }
     
-    func loadimage(recognizer:UITapGestureRecognizer){
+    @objc func loadimage(_ recognizer:UITapGestureRecognizer){
         let imagePicker:UIImagePickerController = UIImagePickerController()
         imagePicker.delegate = self
-        imagePicker.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
-        self.presentViewController(imagePicker, animated: true, completion: nil)
+        imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
+        self.present(imagePicker, animated: true)
     }
     
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         let image = info[UIImagePickerControllerOriginalImage] as! UIImage
         self.imageView.image = image
-        self.imageView.contentMode = UIViewContentMode.Center
-        self.imageView.frame = CGRectMake(0, 0, image.size.width, image.size.height)
+        self.imageView.contentMode = UIViewContentMode.center
+        self.imageView.frame = CGRect(x:0,y: 0,width: image.size.width,height: image.size.height)
         self.scrollView.contentSize = image.size
         let scrollFrame = scrollView.frame
         let scallWidth = scrollFrame.size.width / scrollView.contentSize.width
@@ -47,7 +41,7 @@ class ViewController: UIViewController ,UIScrollViewDelegate , UIImagePickerCont
         self.scrollView.maximumZoomScale = 1
         self.scrollView.zoomScale = minScale
         //self.centerScrollViewContents()
-        picker.dismissViewControllerAnimated(true, completion: nil)
+        picker.dismiss(animated: true, completion: nil)
         
     }
     
@@ -65,29 +59,33 @@ class ViewController: UIViewController ,UIScrollViewDelegate , UIImagePickerCont
             contentFrame.origin.y = 0
         }
     }
+   
     
-    func scrollViewDidZoom(scrollView: UIScrollView) {
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
         self.centerScrollViewContents()
     }
+
     
-    func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
     }
-    
-    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        picker.dismissViewControllerAnimated(true, completion: nil)
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
     }
-    @IBAction func cropSave_btnClicked(sender: AnyObject) {
-        UIGraphicsBeginImageContextWithOptions(self.scrollView.bounds.size, true, UIScreen.mainScreen().scale)
+    
+    @IBAction func cropSave_btnClicked(_ sender: AnyObject) {
+        UIGraphicsBeginImageContextWithOptions(self.scrollView.bounds.size, true, UIScreen.main.scale)
         let offset = scrollView.contentOffset
-        CGContextTranslateCTM(UIGraphicsGetCurrentContext(), -offset.x, -offset.y)
-        self.scrollView.layer.renderInContext(UIGraphicsGetCurrentContext()!)
+        let context = UIGraphicsGetCurrentContext()
+        context?.translateBy(x: -offset.x, y: -offset.y )
+        self.scrollView.layer.render(in: UIGraphicsGetCurrentContext()!)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-        let alter = UIAlertController(title: "Your Cropper Image Saved", message: nil, preferredStyle: UIAlertControllerStyle.Alert)
-        alter.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
-        self.presentViewController(alter, animated: true, completion: nil)
+        UIImageWriteToSavedPhotosAlbum(image!, nil, nil, nil)
+        let alter = UIAlertController(title: "Your Cropper Image Saved", message: nil, preferredStyle: UIAlertControllerStyle.alert)
+        alter.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+        self.present(alter, animated: true)
         
         
     }
