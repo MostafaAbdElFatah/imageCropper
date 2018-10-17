@@ -4,19 +4,18 @@ import UIKit
 
 class ViewController: UIViewController ,UIScrollViewDelegate , UIImagePickerControllerDelegate , UINavigationControllerDelegate {
     
-    var imageView:UIImageView = UIImageView()
+    @IBOutlet weak var imageView:UIImageView!
     @IBOutlet weak var scrollView: UIScrollView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.scrollView.delegate = self
-        self.imageView.frame = CGRect(x: 0, y: 0, width: self.scrollView.frame.size.width, height: self.scrollView.frame.size.height)
-        self.imageView.image = UIImage(named: "2")
-        imageView.isUserInteractionEnabled = true
-        self.scrollView.addSubview(imageView)
+        self.scrollView.minimumZoomScale = 1.0
+        self.scrollView.maximumZoomScale = 10.0
+        
         let tapGestureRecognizer:UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ViewController.loadimage(_:)))
-        tapGestureRecognizer.numberOfTapsRequired = 1
-        imageView.addGestureRecognizer(tapGestureRecognizer)
+        self.imageView.isUserInteractionEnabled = true
+        self.imageView.addGestureRecognizer(tapGestureRecognizer)
         
     }
     
@@ -25,27 +24,16 @@ class ViewController: UIViewController ,UIScrollViewDelegate , UIImagePickerCont
         imagePicker.delegate = self
         imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
         self.present(imagePicker, animated: true)
+        scrollView.zoomScale = 1.0
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         let image = info[UIImagePickerControllerOriginalImage] as! UIImage
         self.imageView.image = image
-        self.imageView.contentMode = UIViewContentMode.center
-        self.imageView.frame = CGRect(x:0,y: 0,width: image.size.width,height: image.size.height)
-        self.scrollView.contentSize = image.size
-        let scrollFrame = scrollView.frame
-        let scallWidth = scrollFrame.size.width / scrollView.contentSize.width
-        let scallheight = scrollFrame.size.height / scrollView.contentSize.height
-        let minScale = min(scallWidth, scallheight)
-        self.scrollView.minimumZoomScale = minScale
-        self.scrollView.maximumZoomScale = 1
-        self.scrollView.zoomScale = minScale
-        //self.centerScrollViewContents()
         picker.dismiss(animated: true, completion: nil)
-        
     }
     
-    func centerScrollViewContents(){
+   func centerScrollViewContents(){
         let boundSize = self.scrollView.bounds.size
         var contentFrame = imageView.frame
         if contentFrame.size.width < boundSize.width{
@@ -75,7 +63,7 @@ class ViewController: UIViewController ,UIScrollViewDelegate , UIImagePickerCont
     }
     
     @IBAction func cropSave_btnClicked(_ sender: AnyObject) {
-        UIGraphicsBeginImageContextWithOptions(self.scrollView.bounds.size, true, UIScreen.main.scale)
+        UIGraphicsBeginImageContext(self.scrollView.bounds.size)
         let offset = scrollView.contentOffset
         let context = UIGraphicsGetCurrentContext()
         context?.translateBy(x: -offset.x, y: -offset.y )
